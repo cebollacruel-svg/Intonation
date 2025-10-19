@@ -1,0 +1,246 @@
+// Wait for the HTML document to be fully loaded before running the script
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- The Game Data ---
+  // Based on the "Inventory of Intonation Patterns Having Grammatical Meanings"
+  const gameData = [
+    {
+      level: 1,
+      rule: "Rule 1: Statements",
+      scenario: "You are making a simple, final statement of fact. You expect no reply.",
+      sentence: "It's raining.",
+      options: [
+        { formula: "2-3-1", desc: "Voice rises to high, then falls to low.", correct: true },
+        { formula: "2-3", desc: "Voice rises to high and stays there.", correct: false }
+      ],
+      explanation: "<strong>Correct! The 2-3-1 (rising-falling) pattern is the default for simple statements, commands, and wh-questions.</strong> It signals completeness. The 2-3 (rising) pattern you didn't choose would make it sound like an incomplete thought or a question."
+    },
+    {
+      level: 2,
+      rule: "Rule 2: Yes/No Questions",
+      scenario: "You are asking a genuine 'yes-no' question. You want to know if she answered.",
+      sentence: "Did she answer?",
+      options: [
+        { formula: "2-3-1", desc: "Voice rises, then falls to low.", correct: false },
+        { formula: "2-3", desc: "Voice rises and stays high.", correct: true }
+      ],
+      explanation: "<strong>Correct! The 2-3 (rising) pattern is used for 'yes-no' questions.</strong> This rising pitch signals incompleteness, inviting the listener to provide the missing 'yes' or 'no'. Using the 2-3-1 (falling) pattern would make it sound like a command or a wh-question."
+    },
+    {
+      level: 3,
+      rule: "Rule 12 vs. 13: Tag Questions",
+      scenario: "You see your friend shivering. You're not really asking, just confirming what you both know. You expect them to agree.",
+      sentence: "It's cold, / isn't it?",
+      options: [
+        { formula: "2-3-1", desc: "Voice FALLS on 'isn't it?'", correct: true },
+        { formula: "2-3", desc: "Voice RISES on 'isn't it?'", correct: false }
+      ],
+      explanation: "<strong>Exactly! This is Rule 13: Tag Questions (Agreement Expected).</strong> The falling 2-3-1 pattern on the tag turns the sentence into a statement indicating you are confident the hearer will agree. If you had used the 2-3 (rising) pattern, it would have been Rule 12: a *real* question, meaning you were genuinely unsure if it was cold."
+    },
+    {
+      level: 4,
+      rule: "Rule 9 vs. 10: Alternative Questions",
+      scenario: "You are at a cafe. You need the customer to CHOOSE ONE option, not answer 'yes'.",
+      sentence: "Do you want coffee, / or tea?",
+      options: [
+        { formula: "2-3 / 2-3", desc: "Rise on 'coffee', and RISE again on 'tea'.", correct: false },
+        { formula: "2-4 / 2-3-1", desc: "Extra-high rise on 'coffee', then FALL on 'tea'.", correct: true }
+      ],
+      explanation: "<strong>Correct! This is Rule 9: Alternative Questions (Requiring a Choice).</strong> To force a choice, one alternative gets an extra-high note (pitch 4) and the final one uses a falling 2-3-1 pattern. If you had used the 2-3 / 2-3 (rise/rise) pattern (Rule 10), you would be asking a 'double yes-no question', and the customer might just say 'Yes,' which isn't helpful!"
+    },
+    {
+      level: 5,
+      rule: "Rule 14: Focus",
+      scenario: "Someone wrongly assumes *John* bought the house. You want to correct them, stressing that *THEY* (some other people) bought it.",
+      sentence: "THEY bought the house.",
+      options: [
+        { formula: "2-4-1 (on 'house')", desc: "The main high note is on 'house'.", correct: false },
+        { formula: "2-4-1 (on 'THEY')", desc: "The main high note is on 'THEY'.", correct: true }
+      ],
+      explanation: "<strong>Perfect! This is Rule 14: Focus.</strong> In English, you can move the high note (the 'focus') to *any* element to signal its importance or to contrast it. By putting the high note on 'THEY', you are 'contradicting an idea... merely implied' (Rule 5)—in this case, the idea that *John* bought it."
+    },
+    {
+      level: 6,
+      rule: "Rule 3: Echo Questions",
+      scenario: "Your boss just said, 'What time is it?' You are shocked and can't believe they asked such a basic question. You repeat their question in disbelief.",
+      sentence: "What time is it?!",
+      options: [
+        { formula: "2-3-1", desc: "Standard falling pattern for a wh-question.", correct: false },
+        { formula: "2-3", desc: "A rising pattern, even on a wh-question.", correct: true }
+      ],
+      explanation: "<strong>That's it! This is Rule 3: Echo Questions.</strong> A wh-question (which normally has a 2-3-1 falling pattern) becomes an 'echo question' when pronounced with a 2-3 rising intonation. It means 'Is that *really* what you just said?' or 'Please repeat that'."
+    },
+    {
+      level: 7,
+      rule: "Rule 7: Series with 'and'",
+      scenario: "You are listing items you bought at the store. You pause after each item in the list.",
+      sentence: "I bought bread, / milk, / and cheese.",
+      options: [
+        { formula: "2-3 / 2-3 / 2-3-1", desc: "Rise on 'bread', rise on 'milk', fall on 'cheese'.", correct: true },
+        { formula: "2-3-1 / 2-3-1 / 2-3-1", desc: "Fall on 'bread', fall on 'milk', fall on 'cheese'.", correct: false }
+      ],
+      explanation: "<strong>Correct! This is Rule 7: Series with 'and'.</strong> The pattern is rising intonation on all members of the series except the last one, which has a rising-falling (2-3-1) intonation to signal the end of the list. If you used a falling 2-3-1 pattern on each item, it would sound like three separate, choppy, and unconnected statements."
+    },
+    {
+      level: 8,
+      rule: "Rule 11: Direct Address",
+      scenario: "You are trying to politely get your teacher's attention at the *end* of a sentence.",
+      sentence: "I have a question, / Mr. Jones.",
+      options: [
+        { formula: "1-2", desc: "Start low and rise to normal on 'Mr. Jones'.", correct: true },
+        { formula: "2-3-1", desc: "Start high and fall to low on 'Mr. Jones'.", correct: false }
+      ],
+      explanation: "<strong>Excellent! This is Rule 11: Direct Address.</strong> The 'safest pattern' for politeness in direct address is a low-to-normal rising intonation (1-2). If your voice *doesn't* rise, you might sound irritated or angry. If it rises too high, it can sound unnatural or even strange (like the 'cannibal' example in the book!)."
+    },
+    {
+      level: 9,
+      rule: "Rule 4: Contrasts",
+      scenario: "You are correcting someone. They said *your* Arabic is good, but you want to emphasize that *HIS* Arabic is the good one, in contrast to yours.",
+      sentence: "HIS Arabic is better than mine.",
+      options: [
+        { formula: "3-2-4-1", desc: "An extra-high note on 'HIS' and another on 'mine'.", correct: true },
+        { formula: "2-3-1", desc: "A standard high note on 'mine' (the last word).", correct: false }
+      ],
+      explanation: "<strong>Nailed it! This is Rule 4: Contrasts and Comparisons.</strong> When contrasting two ideas, special attention is called to both. This is often done by using different high notes, one high (3) and one *extra-high* (4). A standard 2-3-1 pattern would just be a normal statement, losing the crucial contrasting emphasis."
+    },
+    {
+      level: 10,
+      rule: "Rule 6: Nonfinal Intonation",
+      scenario: "You are pausing in the middle of a sentence, but you want to show a *very close connection* to the next part. You are creating suspense.",
+      sentence: "If you want me to, / I'll call her.",
+      options: [
+        { formula: "2-3", desc: "End the first part with a *rising* pattern.", correct: true },
+        { formula: "2-3-1", desc: "End the first part with a *falling* pattern.", correct: false }
+      ],
+      explanation: "<strong>Correct! This is Rule 6 (Nonfinal suspense).</strong> The book describes three ways to handle a nonfinal pause. Using a 2-3 (rising) pattern creates suspense and shows the *closest* connection to the next thought group. Using a 2-3-1 (falling) pattern would create a 'distant connection,' making the two parts sound almost like separate sentences."
+    }
+  ];
+
+  // --- Game Logic ---
+  let currentLevel = 0;
+  let selectedOption = null;
+  let answered = false;
+  const totalLevels = 10; // We have 10 challenges
+
+  // Get elements from the DOM
+  const progressBar = document.getElementById('progress-bar');
+  const scenarioTitle = document.getElementById('scenario-title');
+  const scenarioText = document.getElementById('scenario-text');
+  const sentenceEl = document.getElementById('sentence');
+  const optionsContainer = document.getElementById('options-container');
+  const feedbackBox = document.getElementById('feedback-box');
+  const checkBtn = document.getElementById('check-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  function loadLevel() {
+    // Reset state
+    answered = false;
+    selectedOption = null;
+    feedbackBox.style.display = 'none';
+    feedbackBox.className = '';
+    checkBtn.disabled = true;
+    checkBtn.style.display = 'inline-block';
+    nextBtn.style.display = 'none';
+    
+    // Shuffle the game data after the first playthrough
+    if (currentLevel === 0 && gameData.length > totalLevels) {
+       shuffleArray(gameData);
+    }
+
+    const data = gameData[currentLevel];
+    
+    // Update progress bar
+    progressBar.style.width = `${((currentLevel) / totalLevels) * 100}%`;
+
+    // Populate elements
+    scenarioTitle.textContent = `Level ${currentLevel + 1} of ${totalLevels}: ${data.rule}`;
+    scenarioText.textContent = data.scenario;
+    sentenceEl.textContent = data.sentence;
+    
+    // Clear and create options
+    optionsContainer.innerHTML = '';
+    data.options.forEach((opt, index) => {
+      const optEl = document.createElement('div');
+      optEl.classList.add('option');
+      optEl.dataset.index = index;
+      optEl.innerHTML = `
+        <div class="option-formula">${opt.formula}</div>
+        <div class="option-desc">${opt.desc}</div>
+      `;
+      optEl.addEventListener('click', () => handleOptionClick(optEl, index));
+      optionsContainer.appendChild(optEl);
+    });
+  }
+
+  function handleOptionClick(clickedElement, index) {
+    if (answered) return;
+
+    // Remove 'selected' from all
+    document.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+    
+    // Add 'selected' to clicked
+    clickedElement.classList.add('selected');
+    
+    selectedOption = gameData[currentLevel].options[index];
+    checkBtn.disabled = false;
+  }
+
+  function checkAnswer() {
+    if (answered || !selectedOption) return;
+    
+    answered = true;
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+
+    const data = gameData[currentLevel];
+    
+    if (selectedOption.correct) {
+      feedbackBox.innerHTML = `<strong>✅ Correct!</strong> ${data.explanation}`;
+      feedbackBox.className = 'correct';
+    } else {
+      // Find the correct answer's details to explain
+      const correctOpt = data.options.find(opt => opt.correct);
+      feedbackBox.innerHTML = `<strong>❌ Not quite.</strong> You chose the <strong>${selectedOption.formula}</strong> pattern, which would be incorrect here. 
+                               <p>${data.explanation}</p>`;
+      feedbackBox.className = 'incorrect';
+    }
+    feedbackBox.style.display = 'block';
+
+    if (currentLevel === totalLevels - 1) {
+        nextBtn.textContent = 'Finish & Restart';
+    } else {
+        nextBtn.textContent = 'Next Level';
+    }
+  }
+
+  function nextLevel() {
+    currentLevel++;
+    if (currentLevel >= totalLevels) {
+      currentLevel = 0; // Restart
+      progressBar.style.width = '100%';
+      setTimeout(() => {
+          progressBar.style.transition = 'none';
+          progressBar.style.width = '0%';
+          setTimeout(() => progressBar.style.transition = 'width 0.3s ease', 50);
+      }, 500);
+    }
+    loadLevel();
+  }
+  
+  /* Fisher-Yates Shuffle */
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  // --- Start Game ---
+  // Add event listeners to the buttons
+  checkBtn.addEventListener('click', checkAnswer);
+  nextBtn.addEventListener('click', nextLevel);
+  
+  // Load the first level
+  loadLevel();
+
+});
